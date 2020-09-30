@@ -12,7 +12,9 @@ class CardItemWidget extends StatelessWidget {
     return Dismissible(
       key: ValueKey(cartItem.id),
       background: Container(
-        color: Theme.of(context).errorColor,
+        color: Theme
+            .of(context)
+            .errorColor,
         child: Icon(
           Icons.delete,
           color: Colors.white,
@@ -20,15 +22,31 @@ class CardItemWidget extends StatelessWidget {
         ),
         alignment: Alignment.centerRight,
         padding: EdgeInsets.only(right: 20),
-        margin: EdgeInsets.symmetric(
-          horizontal: 15,
-          vertical: 4
-        ),
+        margin: EdgeInsets.symmetric(horizontal: 15, vertical: 4),
       ),
-      direction: DismissDirection.endToStart,
-      onDismissed: (_){
+      // direction: DismissDirection.endToStart,
+      confirmDismiss: (_) {
+//        return Future.value(false);
+        return showDialog(
+            context: context,
+            builder: (ctx) =>
+                AlertDialog(
+                  title: Text('Tem certeza?'),
+                  content: Text('Quer remover o item do carrinho?'),
+                  actions: [
+                    FlatButton(onPressed: () {
+                      Navigator.of(ctx).pop(false);
+                    }, child: Text('Não')),
+                    FlatButton(onPressed: () {
+                      Navigator.of(ctx).pop(true);
+                    }, child: Text('Sim')),
+                  ],
+                ));
+      },
+      onDismissed: (_) {
         // remove um item
-        Provider.of<Cart>(context, listen: false).removeItem(cartItem.productId);
+        Provider.of<Cart>(context, listen: false)
+            .removeItem(cartItem.productId);
       },
       child: Card(
         margin: EdgeInsets.symmetric(horizontal: 15, vertical: 4),
@@ -39,7 +57,7 @@ class CardItemWidget extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.all(5),
                 child: FittedBox(
-                  child: Text('${cartItem.price}') ,
+                  child: Text('${cartItem.price}'),
                 ),
               ),
             ),
