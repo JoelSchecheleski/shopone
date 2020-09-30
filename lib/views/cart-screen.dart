@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shop/providers/cart-provider.dart';
+import 'package:shop/providers/orders-provider.dart';
 import 'package:shop/widgets/cart_iten_widget.dart';
 import 'package:shop/widgets/produc_grid.dart';
 
@@ -40,9 +41,12 @@ class CartScreen extends StatelessWidget {
                   ),
                   Spacer(),
                   FlatButton(
-                    onPressed: () {},
                     child: Text('COMPRAR'),
                     textColor: Theme.of(context).primaryColor,
+                    onPressed: () {
+                      Provider.of<Orders>(context, listen: false).addOrder(cart);
+                      cart.clear();
+                    },
                   ),
                 ],
               ),
