@@ -1,10 +1,9 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shop/providers/cart-provider.dart';
-import 'package:shop/providers/orders-provider.dart';
-import 'package:shop/widgets/cart_iten_widget.dart';
-import 'package:shop/widgets/produc_grid.dart';
+
+import '../widgets/cart_item_widget.dart';
+import '../providers/cart.dart';
+import '../providers/orders.dart';
 
 class CartScreen extends StatelessWidget {
   @override
@@ -17,14 +16,14 @@ class CartScreen extends StatelessWidget {
         title: Text('Carrinho'),
       ),
       body: Column(
-        children: [
+        children: <Widget>[
           Card(
             margin: EdgeInsets.all(25),
             child: Padding(
               padding: EdgeInsets.all(10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
+                children: <Widget>[
                   Text(
                     'Total',
                     style: TextStyle(fontSize: 20),
@@ -32,10 +31,10 @@ class CartScreen extends StatelessWidget {
                   SizedBox(width: 10),
                   Chip(
                     label: Text(
-                      'R\$ ${cart.totalAmount}',
+                      'R\$${cart.totalAmount}',
                       style: TextStyle(
-                          color:
-                              Theme.of(context).primaryTextTheme.title.color),
+                        color: Theme.of(context).primaryTextTheme.title.color,
+                      ),
                     ),
                     backgroundColor: Theme.of(context).primaryColor,
                   ),
@@ -44,7 +43,8 @@ class CartScreen extends StatelessWidget {
                     child: Text('COMPRAR'),
                     textColor: Theme.of(context).primaryColor,
                     onPressed: () {
-                      Provider.of<Orders>(context, listen: false).addOrder(cart);
+                      Provider.of<Orders>(context, listen: false)
+                          .addOrder(cart);
                       cart.clear();
                     },
                   ),
@@ -56,9 +56,7 @@ class CartScreen extends StatelessWidget {
           Expanded(
             child: ListView.builder(
               itemCount: cart.itemsCount,
-              itemBuilder: (ctx, i) => CardItemWidget(
-                cartItem: cartItems[i],
-              ),
+              itemBuilder: (ctx, i) => CartItemWidget(cartItems[i]),
             ),
           ),
         ],

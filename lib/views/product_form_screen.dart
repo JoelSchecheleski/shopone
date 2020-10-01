@@ -1,8 +1,8 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:shop/providers/product-model.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/product.dart';
+import '../providers/products.dart';
 
 class ProductFormScreen extends StatefulWidget {
   @override
@@ -12,7 +12,7 @@ class ProductFormScreen extends StatefulWidget {
 class _ProductFormScreenState extends State<ProductFormScreen> {
   final _priceFocusNode = FocusNode();
   final _descriptionFocusNode = FocusNode();
-  final _imagegUrlFocusNode = FocusNode();
+  final _imageUrlFocusNode = FocusNode();
   final _imageUrlController = TextEditingController();
   final _form = GlobalKey<FormState>();
   final _formData = Map<String, Object>();
@@ -20,25 +20,44 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   @override
   void initState() {
     super.initState();
-    _imagegUrlFocusNode.addListener(_updateImageUrl);
+    _imageUrlFocusNode.addListener(_updateImage);
   }
 
-  void _updateImageUrl() {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (_formData.isEmpty) {
+      final product = ModalRoute.of(context).settings.arguments as Product;
+      
+      if(product != null) {
+        _formData['id'] = product.id;
+        _formData['title'] = product.title;
+        _formData['description'] = product.description;
+        _formData['price'] = product.price;
+        _formData['imageUrl'] = product.imageUrl;
+
+        _imageUrlController.text = _formData['imageUrl'];
+      } else {
+        _formData['price'] = '';
+      }
+    }
+  }
+
+  void _updateImage() {
     if (isValidImageUrl(_imageUrlController.text)) {
       setState(() {});
     }
   }
 
   bool isValidImageUrl(String url) {
-    bool startWithHttp = url.toLowerCase().startsWith('http://') ||
-        url.toLowerCase().startsWith('https://');
-    bool startWithHttps = url.toLowerCase().startsWith('http://') ||
-        url.toLowerCase().startsWith('https://');
-    bool endswWithPng = url.toLowerCase().endsWith('.png');
-    bool endswWithJpg = url.toLowerCase().endsWith('.jpg');
-    bool endswWithJpeg = url.toLowerCase().endsWith('.jpeg');
+    bool startWithHttp = url.toLowerCase().startsWith('http://');
+    bool startWithHttps = url.toLowerCase().startsWith('https://');
+    bool endsWithPng = url.toLowerCase().endsWith('.png');
+    bool endsWithJpg = url.toLowerCase().endsWith('.jpg');
+    bool endsWithJpeg = url.toLowerCase().endsWith('.jpeg');
     return (startWithHttp || startWithHttps) &&
-        (endswWithPng || endswWithJpg || endswWithJpeg);
+        (endsWithPng || endsWithJpg || endsWithJpeg);
   }
 
   @override
@@ -46,25 +65,34 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     super.dispose();
     _priceFocusNode.dispose();
     _descriptionFocusNode.dispose();
-    _imagegUrlFocusNode.removeListener(_updateImageUrl);
-    _imagegUrlFocusNode.dispose();
+    _imageUrlFocusNode.removeListener(_updateImage);
+    _imageUrlFocusNode.dispose();
   }
 
   void _saveForm() {
-    bool isValied = _form.currentState.validate();
-    if (!isValied) {
+    var isValid = _form.currentState.validate();
+
+    if (!isValid) {
       return;
     }
 
     _form.currentState.save();
 
-    final newProduct = Product(
-      id: Random().nextDouble().toString(),
+    final product = Product(
+      id: _formData['id'],
       title: _formData['title'],
-      description: _formData['description'],
       price: _formData['price'],
+      description: _formData['description'],
       imageUrl: _formData['imageUrl'],
     );
+
+    final products = Provider.of<Products>(context, listen: false);
+    if(_formData['id'] == null) {
+      products.addProduct(product);
+    } else {
+      products.updateProduct(product);
+    }
+    Navigator.of(context).pop();
   }
 
   @override
@@ -72,7 +100,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Formulário Produto'),
-        actions: [
+        actions: <Widget>[
           IconButton(
             icon: Icon(Icons.save),
             onPressed: () {
@@ -86,31 +114,34 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
         child: Form(
           key: _form,
           child: ListView(
-            children: [
+            children: <Widget>[
               TextFormField(
+                initialValue: _formData['title'],
                 decoration: InputDecoration(labelText: 'Título'),
-                // persolizar o erro
                 textInputAction: TextInputAction.next,
-                // altera o tipo de botão para navegar
                 onFieldSubmitted: (_) {
-                  // executa ao clicar em next
                   FocusScope.of(context).requestFocus(_priceFocusNode);
                 },
                 onSaved: (value) => _formData['title'] = value,
                 validator: (value) {
                   bool isEmpty = value.trim().isEmpty;
                   bool isInvalid = value.trim().length < 3;
+
                   if (isEmpty || isInvalid) {
-                    return 'Informe um Título válido!';
+                    return 'Informe um Título válido com no mínimo 3 caracteres!';
                   }
+
                   return null;
                 },
               ),
               TextFormField(
+                initialValue: _formData['price'].toString(),
                 decoration: InputDecoration(labelText: 'Preço'),
-                focusNode: _priceFocusNode,
                 textInputAction: TextInputAction.next,
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                focusNode: _priceFocusNode,
+                keyboardType: TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 onFieldSubmitted: (_) {
                   FocusScope.of(context).requestFocus(_descriptionFocusNode);
                 },
@@ -121,51 +152,52 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                   bool isInvalid = newPrice == null || newPrice <= 0;
 
                   if (isEmpty || isInvalid) {
-                    return 'Informe um valor válido';
+                    return 'Informe um Preço válido!';
                   }
+
                   return null;
                 },
               ),
               TextFormField(
+                initialValue: _formData['description'],
                 decoration: InputDecoration(labelText: 'Descrição'),
-                maxLength: 100,
+                maxLines: 3,
                 keyboardType: TextInputType.multiline,
-                textInputAction: TextInputAction.next,
                 focusNode: _descriptionFocusNode,
                 onSaved: (value) => _formData['description'] = value,
                 validator: (value) {
                   bool isEmpty = value.trim().isEmpty;
                   bool isInvalid = value.trim().length < 10;
+
                   if (isEmpty || isInvalid) {
-                    return 'Informe um Descrição válido!';
+                    return 'Informe uma Descrição válida com no mínimo 10 caracteres!';
                   }
+
                   return null;
                 },
               ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
+                children: <Widget>[
                   Expanded(
                     child: TextFormField(
-                      decoration: InputDecoration(labelText: 'Url da imagem'),
+                      decoration: InputDecoration(labelText: 'URL da Imagem'),
                       keyboardType: TextInputType.url,
                       textInputAction: TextInputAction.done,
-                      // finaliza
-                      focusNode: _imagegUrlFocusNode,
+                      focusNode: _imageUrlFocusNode,
                       controller: _imageUrlController,
-                      onSaved: (value) => _formData['imageUrl'] = value,
                       onFieldSubmitted: (_) {
                         _saveForm();
                       },
+                      onSaved: (value) => _formData['imageUrl'] = value,
                       validator: (value) {
-                        bool emptyUrl = value.trim().isEmpty;
-                        bool invalidUrl = !isValidImageUrl(value);
-                        if (emptyUrl) {
-                          return 'Informe uma URL válida';
+                        bool isEmpty = value.trim().isEmpty;
+                        bool isInvalid = !isValidImageUrl(value);
+
+                        if (isEmpty || isInvalid) {
+                          return 'Informe uma URL válida!';
                         }
-                        if (invalidUrl) {
-                          return 'Deve terminar em .png, .jpg ou .jpeg!';
-                        }
+
                         return null;
                       },
                     ),
@@ -173,9 +205,16 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                   Container(
                     height: 100,
                     width: 100,
-                    margin: EdgeInsets.only(top: 8, left: 10),
+                    margin: EdgeInsets.only(
+                      top: 8,
+                      left: 10,
+                    ),
                     decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey, width: 1)),
+                      border: Border.all(
+                        color: Colors.grey,
+                        width: 1,
+                      ),
+                    ),
                     alignment: Alignment.center,
                     child: _imageUrlController.text.isEmpty
                         ? Text('Informe a URL')
@@ -185,7 +224,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                               fit: BoxFit.cover,
                             ),
                           ),
-                  )
+                  ),
                 ],
               ),
             ],

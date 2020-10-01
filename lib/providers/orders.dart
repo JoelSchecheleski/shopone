@@ -1,7 +1,8 @@
 import 'dart:math';
 
-import 'package:flutter/cupertino.dart';
-import 'package:shop/providers/cart-provider.dart';
+import 'package:flutter/material.dart';
+
+import './cart.dart';
 
 class Order {
   final String id;
@@ -29,7 +30,6 @@ class Orders with ChangeNotifier {
   }
 
   void addOrder(Cart cart) {
-    // final combine = products.fold(0.0, (t, i) => t + i.price * i.quantity);
     _items.insert(
       0,
       Order(

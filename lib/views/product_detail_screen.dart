@@ -1,10 +1,7 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:shop/providers/product-model.dart';
+import '../providers/product.dart';
 
 class ProductDetailScreen extends StatelessWidget {
-//  ProductDetailScreen({this.product});
-
   @override
   Widget build(BuildContext context) {
     final Product product =
@@ -16,12 +13,12 @@ class ProductDetailScreen extends StatelessWidget {
       ),
       body: SingleChildScrollView(
         child: Column(
-          children: [
+          children: <Widget>[
             Container(
               height: 300,
               width: double.infinity,
-              child: CachedNetworkImage(
-                imageUrl: product.imageUrl,
+              child: Image.network(
+                product.imageUrl,
                 fit: BoxFit.cover,
               ),
             ),
@@ -41,7 +38,7 @@ class ProductDetailScreen extends StatelessWidget {
                 product.description,
                 textAlign: TextAlign.center,
               ),
-            )
+            ),
           ],
         ),
       ),

@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shop/providers/orders-provider.dart';
-import 'package:shop/views/app-drawer.dart';
-import 'package:shop/widgets/order_widget.dart';
 
-class OrderScreen extends StatelessWidget {
+import '../widgets/app_drawer.dart';
+import '../providers/orders.dart';
+import '../widgets/order_widget.dart';
+
+
+class OrdersScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Orders orders = Provider.of(context);
-
     return Scaffold(
       appBar: AppBar(
-        title: Text('Meus pedidos'),
+        title: Text('Meus Pedidos'),
       ),
       drawer: AppDrawer(),
       body: ListView.builder(
