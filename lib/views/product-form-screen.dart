@@ -9,11 +9,28 @@ class ProductFormScreen extends StatefulWidget {
 class _ProductFormScreenState extends State<ProductFormScreen> {
   final _priceFocusNode = FocusNode();
   final _descriptionFocusNode = FocusNode();
+  final _imagegUrlFocusNode = FocusNode();
+  final _imageUrlController = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+    _imagegUrlFocusNode.addListener(_updateImageUrl);
+  }
+
+  void _updateImageUrl(){
+    setState(() {
+
+    });
+  }
+
+  @override
   void dispose() {
     super.dispose();
     _priceFocusNode.dispose();
     _descriptionFocusNode.dispose();
+    _imagegUrlFocusNode.removeListener(_updateImageUrl);
+    _imagegUrlFocusNode.dispose();
   }
 
   @override
@@ -52,6 +69,42 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 keyboardType: TextInputType.multiline,
                 textInputAction: TextInputAction.next,
                 focusNode: _descriptionFocusNode,
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      decoration: InputDecoration(labelText: 'Url da imagem'),
+                      keyboardType: TextInputType.url,
+                      textInputAction: TextInputAction.done, // finaliza
+                      focusNode: _imagegUrlFocusNode,
+                      controller:  _imageUrlController,
+                      onFieldSubmitted: (_) {},
+                    ),
+                  ),
+                  Container(
+                    height: 100,
+                    width: 100,
+                    margin: EdgeInsets.only(
+                      top: 8,
+                      left: 10
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.grey,
+                        width: 1
+                      )
+                    ),
+                    alignment: Alignment.center,
+                    child: _imageUrlController.text.isEmpty ? Text('Informe a URL') : FittedBox(
+                      child: Image.network(
+                          _imageUrlController.text,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  )
+                ],
               ),
             ],
           ),
