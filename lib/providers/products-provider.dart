@@ -5,16 +5,19 @@ import 'package:shop/providers/product-model.dart';
 class Products with ChangeNotifier {
   // padrão observable
 
-  List<Product> _itens = DUMMY_PRODUCTS;
+  List<Product> _items = DUMMY_PRODUCTS;
 
   // Retorna uma cópia e não um valor original
-  List<Product> get items  => [ ..._itens ];
+  List<Product> get items  => [ ..._items ];
   List<Product> get favoritesItems {
-    return _itens.where((p) => p.isFavorite).toList();
+    return _items.where((p) => p.isFavorite).toList();
   }
 
+  int get itemsCount {
+    return _items.length;
+  }
   void addProduct(Product product) {
-    _itens.add(product);
+    _items.add(product);
     notifyListeners(); // Notifica todos os interessados quando uma mudança acontecer.
   }
 }
@@ -23,9 +26,9 @@ class Products with ChangeNotifier {
 
 //  List<Product> get items {
 //    if (_showFavoriteOnly) {
-//      return _itens.where((prod) => prod.isFavorite).toList();
+//      return _items.where((prod) => prod.isFavorite).toList();
 //    } else {
-//      return [ ..._itens ];
+//      return [ ..._items ];
 //    }
 //  }
 

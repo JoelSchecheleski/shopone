@@ -1,10 +1,11 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shop/providers/product-model.dart';
 import 'package:shop/utils/app-routes.dart';
 import 'package:shop/providers/cart-provider.dart';
 
-class ProductItem extends StatelessWidget {
+class ProductGridItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Product product =
@@ -21,8 +22,8 @@ class ProductItem extends StatelessWidget {
             Navigator.of(context)
                 .pushNamed(AppRoutes.PRODUCT_DATAIL, arguments: product);
           },
-          child: Image.network(
-            product.imageUrl,
+          child: CachedNetworkImage(
+            imageUrl: product.imageUrl,
             fit: BoxFit.cover,
           ),
         ),
