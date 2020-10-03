@@ -7,7 +7,9 @@ import './product.dart';
 import '../data/dummy_data.dart';
 
 class Products with ChangeNotifier {
-  List<Product> _items = DUMMY_PRODUCTS;
+  final String _url = 'https://shopone-2a5ba.firebaseio.com/products.json';
+
+  List<Product> _items = []; // DUMMY_PRODUCTS
 
   List<Product> get items => [..._items];
 
@@ -19,11 +21,31 @@ class Products with ChangeNotifier {
     return _items.where((prod) => prod.isFavorite).toList();
   }
 
-  Future<void> addProduct(Product newProduct) async {
-    const url = 'https://shopone-2a5ba.firebaseio.com/products.json';
+  /// Carrega os produtos
+  Future<void> loadProducts() async {
+    final response = await get(_url);
+    Map<String, dynamic> data = json.decode(response.body);
+    _items.clear();
+    if (data != null) {
+      data.forEach((productId, productData) {
+        _items.add(Product(
+          id: productId,
+          title: productData['title'],
+          description: productData['description'],
+          price: productData['price'],
+          imageUrl: productData['imageUrl'],
+          isFavorite: productData['isFavorite'],
+        ));
+      });
+      notifyListeners();
+    }
+    return Future.value();
+  }
 
+  /// Adiciona um novo produto no firebase
+  Future<void> addProduct(Product newProduct) async {
     final response = await post(
-      url,
+      _url,
       body: json.encode({
         'title': newProduct.title,
         'description': newProduct.description,
