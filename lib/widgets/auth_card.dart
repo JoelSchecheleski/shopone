@@ -25,19 +25,17 @@ class _AuthCardState extends State<AuthCard> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-          title: Text("Ocorreu um erro"),
-          content: Text(msg),
-          actions: [
-            FlatButton(
-              onPressed: () {
-                setState(() {
-                  _isLoading = false;
-                });
-                Navigator.of(context).pop();
-              },
-              child: Text("Fechar"),
-            )
-          ]),
+        title: Text('Ocorreu um erro!'),
+        content: Text(msg),
+        actions: <Widget>[
+          FlatButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('Fechar'),
+          )
+        ],
+      ),
     );
   }
 
@@ -45,6 +43,7 @@ class _AuthCardState extends State<AuthCard> {
     if (!_form.currentState.validate()) {
       return;
     }
+
     setState(() {
       _isLoading = true;
     });
@@ -55,20 +54,25 @@ class _AuthCardState extends State<AuthCard> {
 
     try {
       if (_authMode == AuthMode.Login) {
-        // Login
-        await auth.login(_authData["email"], _authData["password"]);
+        await auth.login(
+          _authData["email"],
+          _authData["password"],
+        );
       } else {
-        // Registro
-        await auth.signup(_authData["email"], _authData["password"]);
+        await auth.signup(
+          _authData["email"],
+          _authData["password"],
+        );
       }
-      setState(() {
-        _isLoading = false;
-      });
     } on AuthException catch (error) {
       _showErrorDialog(error.toString());
     } catch (error) {
-      _showErrorDialog("Erro inesperado!");
+      _showErrorDialog("Ocorreu um erro inesperado!");
     }
+
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   void _switchAuthMode() {
@@ -85,26 +89,27 @@ class _AuthCardState extends State<AuthCard> {
 
   @override
   Widget build(BuildContext context) {
-    final deviceScreen = MediaQuery.of(context).size;
+    final deviceSize = MediaQuery.of(context).size;
+
     return Card(
       elevation: 8.0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10.0),
       ),
       child: Container(
-        height: _authMode == AuthMode.Login ? 330 : 391,
-        width: deviceScreen.width * 0.75,
+        height: _authMode == AuthMode.Login ? 290 : 371,
+        width: deviceSize.width * 0.75,
         padding: EdgeInsets.all(16.0),
         child: Form(
           key: _form,
           child: Column(
-            children: [
+            children: <Widget>[
               TextFormField(
-                decoration: InputDecoration(labelText: 'E-Mail'),
+                decoration: InputDecoration(labelText: 'E-mail'),
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) {
                   if (value.isEmpty || !value.contains('@')) {
-                    return "Informe um e-mail válido";
+                    return "Informe um e-mail válido!";
                   }
                   return null;
                 },
@@ -116,7 +121,7 @@ class _AuthCardState extends State<AuthCard> {
                 obscureText: true,
                 validator: (value) {
                   if (value.isEmpty || value.length < 5) {
-                    return "Informe um senha válido";
+                    return "Informe uma senha válida!";
                   }
                   return null;
                 },
@@ -124,12 +129,12 @@ class _AuthCardState extends State<AuthCard> {
               ),
               if (_authMode == AuthMode.Signup)
                 TextFormField(
-                  decoration: InputDecoration(labelText: 'Confirmar senha'),
+                  decoration: InputDecoration(labelText: 'Confirmar Senha'),
                   obscureText: true,
                   validator: _authMode == AuthMode.Signup
                       ? (value) {
                           if (value != _passwordController.text) {
-                            return "Senhas são diferentes!";
+                            return "Senha são diferentes!";
                           }
                           return null;
                         }
@@ -150,13 +155,15 @@ class _AuthCardState extends State<AuthCard> {
                     vertical: 8.0,
                   ),
                   child: Text(
-                      _authMode == AuthMode.Login ? 'ENTRAR' : 'REGISTRAR'),
+                    _authMode == AuthMode.Login ? 'ENTRAR' : 'REGISTRAR',
+                  ),
                   onPressed: _submit,
                 ),
               FlatButton(
                 onPressed: _switchAuthMode,
                 child: Text(
-                    "ALTERAR P/ ${_authMode == AuthMode.Login ? 'REGISTRAR' : 'ENTRAR'}"),
+                  "ALTERNAR P/ ${_authMode == AuthMode.Login ? 'REGISTRAR' : 'LOGIN'}",
+                ),
                 textColor: Theme.of(context).primaryColor,
               ),
             ],
